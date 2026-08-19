@@ -5,3 +5,7 @@ scikit-learn
 pandas
 numpy
 accelerate
+django==5.1.2
+django-cors-headers==4.4.0
+requests==2.32.3
+psycopg[binary]==3.2.1
