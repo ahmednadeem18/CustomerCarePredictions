@@ -140,16 +140,16 @@ def feedback(request: HttpRequest) -> JsonResponse:
     try:
         service = SupabaseFeedbackService.from_settings()
         stored = service.save_feedback(feedback_record)
-    except ServiceConfigError as exc:
+    except ServiceConfigError:
         return error_response(
             code="configuration_error",
-            message=str(exc),
+            message="Feedback storage is not configured on the server.",
             status_code=503,
         )
-    except ServiceUnavailableError as exc:
+    except ServiceUnavailableError:
         return error_response(
             code="dependency_error",
-            message=str(exc),
+            message="Feedback storage dependency is unavailable.",
             status_code=502,
         )
 
