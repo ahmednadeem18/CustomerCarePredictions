@@ -1,0 +1,63 @@
+text,category
+I was charged twice for my dress order,order_billing
+Where is my refund for the returned jacket?,order_billing
+My credit card was declined at checkout,order_billing
+Can I get an invoice for my order #4521?,order_billing
+Why was I charged shipping when my order was over $100?,order_billing
+My payment went through but I didn't get an order confirmation,order_billing
+How do I apply my 15% discount code to this order?,order_billing
+I was charged full price instead of the sale price,order_billing
+Where can I track my package delivery status?,order_billing
+Can I change my payment method after placing the order?,order_billing
+I need a price match for an item that went on sale,order_billing
+Why is there a foreign transaction fee on my receipt?,order_billing
+My gift card balance is not updating after purchase,order_billing
+Can I pay using Apple Pay or PayPal?,order_billing
+I haven't received my store credit refund yet,order_billing
+The app keeps crashing when I try to open my cart,technical
+The website is loading very slowly on my mobile phone,technical
+I cannot click the checkout button on the desktop site,technical
+The promo code box is broken and won't accept my text,technical
+Images of the shirts are not displaying on the product page,technical
+I get a 500 server error whenever I try to log in,technical
+The size selection drop-down menu is not responding,technical
+I am getting an API error when trying to save my shipping address,technical
+The web page keeps auto-refreshing while I am browsing,technical
+The filters for color and price are not working on the search page,technical
+I forgot my account password and the reset link is broken,technical
+My shopping bag keeps clearing itself automatically,technical
+Your customer support representative was very rude on the phone,complaint_feedback
+My package arrived two weeks late and missed the event,complaint_feedback
+The stitching on the dress unraveled after just one wear,complaint_feedback
+I am very unhappy with the cheap material quality of this coat,complaint_feedback
+I received the completely wrong item in my package,complaint_feedback
+Your return process is way too complicated and expensive,complaint_feedback
+You should add a wishlist feature so we can save items for later,complaint_feedback
+I have been waiting three days for a response to my email,complaint_feedback
+The color of the jacket looks nothing like the photo online,complaint_feedback
+"I love your new summer collection, please bring back the floral prints!",complaint_feedback
+This is the worst customer service experience I have had with a brand,complaint_feedback
+What is the capital city of France?,irrelevant
+Can you give me a good recipe for chocolate chip cookies?,irrelevant
+Who won the World Cup last year?,irrelevant
+What is the weather forecast for London this weekend?,irrelevant
+How do I solve a quadratic equation?,irrelevant
+What time does the local movie theater open today?,irrelevant
+Can you write a poem about autumn leaves?,irrelevant
+How far is the moon from the Earth?,irrelevant
+What is the capital of Japan?,irrelevant
+How many ounces are in a gallon?,irrelevant
+Who painted the Mona Lisa?,irrelevant
+What is the speed of light in vacuum?,irrelevant
+your website is to lazy,technical
+this coffee is sweet,irrelevant
+i have paid the amount when i will get my order,order_billing
+your food taste is so bitter,irrelevant
+your clothes are bad,complaint_feedback
+your clothes are of low quality,complaint_feedback
+your clothes are of low quality,complaint_feedback
+your clothes are bad,complaint_feedback
+i have paid the amount but still waiting to get my clothes,order_billing
+getting an unsual response while saving the address,technical
+get the error the when update the details,technical
+I haven't received my store credit refund yet,order_billing

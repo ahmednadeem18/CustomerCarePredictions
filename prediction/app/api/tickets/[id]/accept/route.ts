@@ -1,0 +1,260 @@
+import { NextResponse } from "next/server";
+import { pool } from "@/lib/db";
+
+type AcceptTicketBody = {
+  user_id: number;
+};
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const client = await pool.connect();
+
+  try {
+    const { id } = await params;
+    const ticketId = Number(id);
+
+    if (!Number.isInteger(ticketId)) {
+      return NextResponse.json(
+        { error: "Invalid ticket id" },
+        { status: 400 }
+      );
+    }
+
+    const body =
+      (await request.json()) as AcceptTicketBody;
+
+    const userId = Number(body.user_id);
+
+    if (!Number.isInteger(userId)) {
+      return NextResponse.json(
+        { error: "Valid user_id is required" },
+        { status: 400 }
+      );
+    }
+
+    await client.query("BEGIN");
+
+    const ticketResult = await client.query(
+      `
+      SELECT
+        id,
+        question,
+        status,
+        current_department_id,
+        final_department_id
+      FROM tickets
+      WHERE id = $1
+      FOR UPDATE
+      `,
+      [ticketId]
+    );
+
+    if (ticketResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        { error: "Ticket not found" },
+        { status: 404 }
+      );
+    }
+
+    const ticket = ticketResult.rows[0];
+
+    if (!ticket.current_department_id) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        {
+          error:
+            "Ticket has no current department",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (ticket.status === "closed") {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        {
+          error: "Ticket is already closed",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (ticket.final_department_id) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        {
+          error:
+            "Ticket has already been finalized",
+        },
+        { status: 400 }
+      );
+    }
+
+    const userResult = await client.query(
+      `
+      SELECT
+        id,
+        department_id,
+        role
+      FROM users
+      WHERE id = $1
+      `,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const user = userResult.rows[0];
+
+    if (
+      user.department_id !==
+      ticket.current_department_id
+    ) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        {
+          error:
+            "You cannot accept a ticket assigned to another department",
+        },
+        { status: 403 }
+      );
+    }
+
+    const departmentResult =
+      await client.query(
+        `
+        SELECT id, name
+        FROM departments
+        WHERE id = $1
+        `,
+        [ticket.current_department_id]
+      );
+
+    if (departmentResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        {
+          error: "Department not found",
+        },
+        { status: 400 }
+      );
+    }
+
+    const department =
+      departmentResult.rows[0];
+
+    await client.query(
+      `
+      UPDATE tickets
+      SET
+        final_department_id = current_department_id,
+        accepted_by = $1,
+        status = 'in_progress',
+        updated_at = NOW()
+      WHERE id = $2
+      `,
+      [userId, ticketId]
+    );
+
+    await client.query(
+      `
+      INSERT INTO ticket_history (
+        ticket_id,
+        action,
+        from_department_id,
+        to_department_id,
+        performed_by,
+        note
+      )
+      VALUES (
+        $1,
+        'accepted',
+        $2,
+        $2,
+        $3,
+        $4
+      )
+      `,
+      [
+        ticketId,
+        ticket.current_department_id,
+        userId,
+        `Ticket accepted by ${department.name}`,
+      ]
+    );
+
+    const trainingResult =
+      await client.query(
+        `
+        INSERT INTO training_examples (
+          ticket_id,
+          text,
+          department_id,
+          created_at,
+          source,
+          created_by
+        )
+        VALUES (
+          $1,
+          $2,
+          $3,
+          NOW(),
+          'ticket',
+          $4
+        )
+        RETURNING id
+        `,
+        [
+          ticketId,
+          ticket.question,
+          ticket.current_department_id,
+          userId,
+        ]
+      );
+
+    await client.query("COMMIT");
+
+    return NextResponse.json({
+      success: true,
+      message: "Ticket accepted successfully",
+      ticket_id: ticketId,
+      department: department.name,
+      training_example_id:
+        trainingResult.rows[0].id,
+    });
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    console.error(
+      "Accept ticket error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error: "Failed to accept ticket",
+      },
+      { status: 500 }
+    );
+
+  } finally {
+    client.release();
+  }
+}
